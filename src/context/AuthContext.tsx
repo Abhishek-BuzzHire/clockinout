@@ -4,7 +4,6 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode"; // Install: npm install jwt-decode @types/jwt-decode
 import { useRouter } from "next/navigation"; // Assuming you might want to use routing
-import api from "@/lib/api";
 
 // --- 1. Define Types for Clarity and Safety ---
 
@@ -88,10 +87,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
    * @param userData Any extra data returned from the backend (optional).
    */
   const login = (access: string, refresh: string, userData: UserState) => {
-        api.defaults.headers.common["Authorization"] = `Bearer ${access}`;
     // Set cookies with appropriate expiration times
     // NOTE: Access token expiration should match backend setting (e.g., 5-60 minutes)
-    Cookies.set("access", access, { expires: 1 / 24, secure: true, sameSite: 'Strict' }); // ~1 hour expiration
+    Cookies.set("access", access, { expires: 7, secure: true, sameSite: 'Strict' }); // ~1 hour expiration
     Cookies.set("refresh", refresh, { expires: 30, secure: true, sameSite: 'Strict' }); // 30 days expiration
 
     // Set the user state immediately
@@ -105,12 +103,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
    * Handles user logout: removes cookies and clears user state.
    */
   const logout = () => {
-    delete api.defaults.headers.common["Authorization"];
     Cookies.remove("access");
     Cookies.remove("refresh");
     setUser(null);
     // Optional: Redirect to login page
-    router.push('/login'); 
+    // router.push('/login'); 
   };
 
   // The context value to be provided to consumers
