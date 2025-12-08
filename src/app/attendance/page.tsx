@@ -221,9 +221,11 @@ const EmployeeAttendancePage = () => {
                     const now = Date.now();
                     const elapsed = Math.max(0, Math.floor((now - punchIn) / 1000));
                     setInitialElapsedSeconds(elapsed);
-                    setPunchTime(new Date(data.data.punch_in_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+                    // setPunchTime(new Date(data.data.punch_in_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+                    setPunchTime(data.data.punch_in_time)
                 } else if (data.data.punch_out_time) {
-                    setPunchTime(new Date(data.data.punch_out_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+                    // setPunchTime(new Date(data.data.punch_out_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+                    setPunchTime(data.data.punch_out_time)
                     setInitialElapsedSeconds(0);
                 } else {
                     setPunchTime("");
@@ -285,10 +287,12 @@ const EmployeeAttendancePage = () => {
                         const pIn = new Date(data.data.punch_in_time).getTime();
                         const elapsed = Math.max(0, Math.floor((Date.now() - pIn) / 1000));
                         setInitialElapsedSeconds(elapsed);
-                        setPunchTime(new Date(data.data.punch_in_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+                        // setPunchTime(new Date(data.data.punch_in_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+                        setPunchTime(data.data.punch_in_time)
                     } else if (type === "out" && data.data.punch_out_time) {
                         setInitialElapsedSeconds(0);
-                        setPunchTime(new Date(data.data.punch_out_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+                        // setPunchTime(new Date(data.data.punch_out_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+                        setPunchTime(data.data.punch_out_time)
                     }
                 } else {
                     // fallback: refresh today's attendance
