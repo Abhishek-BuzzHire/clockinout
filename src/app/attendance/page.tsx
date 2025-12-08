@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { format, isToday, isFuture, isWeekend, endOfWeek } from "date-fns";
@@ -32,15 +31,15 @@ type PunchResponse = {
     data?: AttendanceRecord;
 };
 
-// const formatTime = (totalSeconds: number): string => {
-//     const hours = Math.floor(totalSeconds / 3600);
-//     const minutes = Math.floor((totalSeconds % 3600) / 60);
-//     const seconds = totalSeconds % 60;
+const formatTime = (totalSeconds: number): string => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-//     return [hours, minutes, seconds]
-//         .map((v) => (v < 10 ? "0" + v : v))
-//         .join(" : ");
-// };
+    return [hours, minutes, seconds]
+        .map((v) => (v < 10 ? "0" + v : v))
+        .join(" : ");
+};
 
 const PunchCard: React.FC<{
     isPunchedIn: boolean;
@@ -222,10 +221,10 @@ const EmployeeAttendancePage = () => {
                     const elapsed = Math.max(0, Math.floor((now - punchIn) / 1000));
                     setInitialElapsedSeconds(elapsed);
                     // setPunchTime(new Date(data.data.punch_in_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-                    setPunchTime(data.data.punch_in_time)
+                    setPunchTime(format(new Date(data.data.punch_in_time), 'MMM dd, yyyy'))
                 } else if (data.data.punch_out_time) {
                     // setPunchTime(new Date(data.data.punch_out_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-                    setPunchTime(data.data.punch_out_time)
+                    setPunchTime(format(new Date(data.data.punch_out_time), 'MMM dd, yyyy'))
                     setInitialElapsedSeconds(0);
                 } else {
                     setPunchTime("");
@@ -288,11 +287,11 @@ const EmployeeAttendancePage = () => {
                         const elapsed = Math.max(0, Math.floor((Date.now() - pIn) / 1000));
                         setInitialElapsedSeconds(elapsed);
                         // setPunchTime(new Date(data.data.punch_in_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-                        setPunchTime(data.data.punch_in_time)
+                        setPunchTime(format(new Date(data.data.punch_in_time),'MMM dd, yyyy'))
                     } else if (type === "out" && data.data.punch_out_time) {
                         setInitialElapsedSeconds(0);
                         // setPunchTime(new Date(data.data.punch_out_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-                        setPunchTime(data.data.punch_out_time)
+                        setPunchTime(format(new Date(data.data.punch_out_time), 'MMM dd, yyyy'))
                     }
                 } else {
                     // fallback: refresh today's attendance
