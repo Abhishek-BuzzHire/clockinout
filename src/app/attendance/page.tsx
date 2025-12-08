@@ -13,7 +13,7 @@ import Cookies from "js-cookie";
 
 type DayStatus = "weekend" | "absent" | "present" | "today" | "future";
 
-const apiUrl= "http://localhost:8000/api/attendance"
+const apiUrl= "https://buzzhire.trueledgrr.com/api/attendance"
 
 type AttendanceRecord = {
     id?: number;
@@ -32,15 +32,15 @@ type PunchResponse = {
     data?: AttendanceRecord;
 };
 
-const formatTime = (totalSeconds: number): string => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
+// const formatTime = (totalSeconds: number): string => {
+//     const hours = Math.floor(totalSeconds / 3600);
+//     const minutes = Math.floor((totalSeconds % 3600) / 60);
+//     const seconds = totalSeconds % 60;
 
-    return [hours, minutes, seconds]
-        .map((v) => (v < 10 ? "0" + v : v))
-        .join(" : ");
-};
+//     return [hours, minutes, seconds]
+//         .map((v) => (v < 10 ? "0" + v : v))
+//         .join(" : ");
+// };
 
 const PunchCard: React.FC<{
     isPunchedIn: boolean;
@@ -107,18 +107,6 @@ const PunchCard: React.FC<{
                 <p className={`font-bold text-lg mb-2 ${isPunchedIn ? "text-green-600" : "text-red-600"}`}>
                     {isPunchedIn ? "IN" : "OUT"}
                 </p>
-
-                <div className="flex justify-center items-center space-x-2 text-lg font-semibold tracking-wider mb-4 text-gray-800">
-                    {formatTime(elapsedTime)
-                        .split(" : ")
-                        .map((segment, index) => (
-                            <React.Fragment key={index}>
-                                <div className="bg-gray-200 px-2 py-1 rounded-lg">{segment}</div>
-                                {index < 2 && <span className="text-gray-500">:</span>}
-                            </React.Fragment>
-                        ))}
-                </div>
-
                 <button
                     onClick={handlePunchAction}
                     className={`w-2/3 py-3 rounded-lg font-normal text-white text-md shadow-lg transform transition-all duration-300
