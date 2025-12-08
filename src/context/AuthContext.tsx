@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode"; // Install: npm install jwt-decode @types/jwt-decode
 import { useRouter } from "next/navigation"; // Assuming you might want to use routing
+import axios from "axios";
 
 // --- 1. Define Types for Clarity and Safety ---
 
@@ -34,7 +35,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (access: string, refresh: string, userData: any) => void;
   logout: () => void;
-  // refreshToken: () => Promise<void>; // Add if you implement refresh logic
+  refreshAccessToken: () => Promise<void>; // Add if you implement refresh logic
 }
 
 // --- 2. Create Context ---
@@ -68,6 +69,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // -------------------------------
+  // 🔄 Refresh Access Token
+  // -------------------------------
+  const refreshAccessToken = async () => {
+    const refresh = Cookies.get("refresh");
+    if (!refresh) return null;
+
+    try {
+      const res = await axios.post("/api/token/refresh/", {
+        refresh
+      });
+
+      const newAccess = res.data.access;
+
+      // Save new access token in cookie
+      Cookies.set("access", newAccess, {
+        expires: 1 / 24, // 1 hour
+        secure: true,
+        sameSite: "Strict",
+      });
+
+      // Set new user state
+      setUserFromToken(newAccess);
+
+      return newAccess;
+    } catch (err) {
+      console.log("Refresh failed → logging out");
+      logout(); 
+      return null;
+    }
+  };
+
+  
+  // -------------------------------
+  // Auto Refresh Every 4 Minutes
+  // -------------------------------
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshAccessToken();
+    }, 4 * 60 * 1000); // 4 minutes
+
+    return () => clearInterval(interval);
+  }, []);
+
   /**
    * Loads user state from cookies on initial component mount.
    */
@@ -75,7 +120,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const accessToken = Cookies.get("access");
 
     if (accessToken) {
-      setUserFromToken(accessToken);
+      const decoded = jwtDecode<TokenPayload>(accessToken);
+
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        // Token expired → refresh
+        refreshAccessToken();
+      } else {
+        setUserFromToken(accessToken);
+      }
     }
     setLoading(false); // Finished checking cookies
   }, []);
@@ -89,8 +143,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = (access: string, refresh: string, userData: UserState) => {
     // Set cookies with appropriate expiration times
     // NOTE: Access token expiration should match backend setting (e.g., 5-60 minutes)
-    Cookies.set("access", access,); // ~1 hour expiration
-    Cookies.set("refresh", refresh, ); // 30 days expiration
+    Cookies.set("access", access, { expires: 1 / 24, secure: true, sameSite: 'Strict' }); // ~1 hour expiration
+    Cookies.set("refresh", refresh, { expires: 30, secure: true, sameSite: 'Strict' }); // 30 days expiration
 
     // Set the user state immediately
     setUser(userData);
@@ -116,6 +170,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     login,
     logout,
+    refreshAccessToken
   };
 
   // Render the provider
@@ -135,7 +190,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-
-// { expires: 30, secure: true, sameSite: 'Strict' }
-//  { expires: 1 / 24, secure: true, sameSite: 'Strict' }
